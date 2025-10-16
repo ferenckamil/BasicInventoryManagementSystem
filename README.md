@@ -24,23 +24,11 @@ BasicInventoryManagementSystem/
 - CMake 3.15+
 - Git (for version control)
 
-## Build Instructions
-
-```bash
-#Clone the repository
-git clone https://github.com/ferenckamil/BasicInventoryManagementSystem.git
-cd BasicInventoryManagementSystem
-
-# Create build directory
-cmake -S . -B build
-
-# Build project
-cmake --build build
-
-# Run application
-./build/BasicInventoryManagementSystem.exe
-
-```
+For Windows:
+- VS Code with extensions:
+  - C/C++ (Microsoft)
+  - CMake Tools (Microsoft)
+- MinGW-w64 standalone
 
 ## Usage
 
@@ -48,6 +36,10 @@ Follow the on-screen instructions to:
 - Add, remove, or update inventory items
 - View the current inventory
 - Save or load inventory data from files
+
+# Demo
+
+TODO
 
 ## Improvements
 
