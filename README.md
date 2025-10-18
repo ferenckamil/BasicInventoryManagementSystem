@@ -12,8 +12,9 @@ C++ application that models a basic inventory management system for a store. The
 ## Project Structure
 ```
 BasicInventoryManagementSystem/
-├── src/ # Source files
 ├── include/ # Header files
+├── src/ # Source files
+├── text-files/ # TXT file to populate inventory and sample output file with saved inventory
 ├── CMakeLists.txt # CMake build configuration
 └── README.md # Project description
 ```
