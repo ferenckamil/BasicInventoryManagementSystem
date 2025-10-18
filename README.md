@@ -21,7 +21,7 @@ BasicInventoryManagementSystem/
 
 ## Requirements
 
-- C++17 or higher
+- C++20 or higher
 - CMake 3.15+
 - Git (for version control)
 

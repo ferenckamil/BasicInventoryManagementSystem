@@ -1,18 +1,74 @@
 #include <inventory.hpp>
 
+#include <electronics.hpp>
+#include <groceries.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
 #include <sstream>
 #include <filesystem>
 
+
+Inventory::Inventory() {
+    itemFactoryRegistry["ELECTRONICS"] = [](const std::vector<std::string>& elements) -> std::unique_ptr<Item> {
+        if (elements.size() != 6) 
+        {
+            throw std::invalid_argument("Incorrect input data for Electronics");
+        }
+        
+        std::chrono::year_month_day warrantyPeriod;
+        std::stringstream date(elements[5]);
+        date >> std::chrono::parse("%F", warrantyPeriod);
+
+        if (date.fail() || !warrantyPeriod.ok()) 
+        {
+            throw std::invalid_argument("Invalid warranty period period format");
+        }
+        
+        return std::make_unique<Electronics>(elements[1], elements[2], std::stoi(elements[3]), std::stod(elements[4]), warrantyPeriod);
+    };
+
+    itemFactoryRegistry["GROCERIES"] = [](const std::vector<std::string>& elements) -> std::unique_ptr<Item> {
+        if (elements.size() != 6) 
+        {
+            throw std::invalid_argument("Incorrect input data for Groceries");
+        }
+        
+        std::chrono::year_month_day expirationDate;
+        std::stringstream date(elements[5]);
+        date >> std::chrono::parse("%F", expirationDate);
+
+        if (date.fail() || !expirationDate.ok()) 
+        {
+            throw std::invalid_argument("Invalid expiration date period format");
+        }
+        
+        return std::make_unique<Groceries>(elements[1], elements[2], std::stoi(elements[3]), std::stod(elements[4]), expirationDate);
+    };
+
+    itemFactoryRegistry["ITEM"] = [](const std::vector<std::string>& elements) -> std::unique_ptr<Item> {
+        if (elements.size() != 5) 
+        {
+            throw std::invalid_argument("Incorrect input data for Groceries");
+        }
+        
+        return std::make_unique<Item>(elements[1], elements[2], std::stoi(elements[3]), std::stod(elements[4]));
+    };
+}
+
 /*
 returns true if add operation was successful
 return false if item with same id already exist in the inventory.
 */
-bool Inventory::addItem(const Item& item) {
+bool Inventory::addItem(std::unique_ptr<Item> item) {
 
-    auto result = itemsCollection.emplace(std::make_pair(item.getItemID(), item));
+    if(!item)
+    {
+        return false;
+    }
+
+    auto result = itemsCollection.emplace(std::make_pair(item->getItemID(), std::move(item)));
 
     return result.second;
 }
@@ -49,7 +105,16 @@ bool Inventory::updateItem(const std::string& itemID, int quantity) {
 
     if(auto found = itemsCollection.find(itemID); found != itemsCollection.end())
     {
-        found->second.setQuantity(quantity);
+        try
+        {
+            found->second->setQuantity(quantity);
+        }
+        catch(const std::invalid_argument& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        
+        
         return true;
     }
 
@@ -58,20 +123,20 @@ bool Inventory::updateItem(const std::string& itemID, int quantity) {
 
 void Inventory::displayInventory() const {
 
-    std::cout<<"----------- Inventory state -----------"<<std::endl;
+    std::cout<<"----------- Inventory state -----------"<<"\n";
 
     if(itemsCollection.empty())
     {
-        std::cerr<<"Inventory is empty"<<std::endl;
+        std::cerr<<"Inventory is empty"<<"\n";
     }
 
     for(auto & val : itemsCollection)
     {
-        const Item & item = val.second;
-        std::cout<<"Item ID: "<<item.getItemID()<<", Name: "<<item.getName()<<", Quantity: "<<item.getQuantity()<<", Price: "<<item.getPrice()<<std::endl;
+        val.second->displayItem();
+        std::cout<<"\n";
     } 
     
-    std::cout<<"---------------------------------------"<<std::endl;
+    std::cout<<"---------------------------------------"<<"\n";
 }
 
 
@@ -93,19 +158,33 @@ void Inventory::readFromFile(const std::string& path) {
         lineNumber++;
         split(line, ',', elements);
 
-        if(elements.size() != 4)
+        if(elements.empty())
         {
-            std::cerr << "Warning: Incorrect line format. Skipping line number: " << lineNumber << std::endl;
+            std::cerr << "Warning: Empty line. Skipping line number: " << lineNumber << "\n";
             continue;
         }
         
-        Item item(elements[0], elements[1], std::stoi(elements[2]), std::stod(elements[3]));
+        const std::string& itemType = elements[0];
 
-        if(!this->addItem(item)){
-            std::cerr << "Can not add the element with ID: " + item.getItemID() + ". Item with this ID already present in inventory. Skipping..."<<std::endl;
-            continue;
+        try
+        {
+            auto it = itemFactoryRegistry.find(itemType);
+            if (it == itemFactoryRegistry.end()) 
+            {
+                throw std::invalid_argument("Unknown item type: " + itemType);
+            }
+            
+            std::unique_ptr<Item> item = it->second(elements);
+            std::string currId = item->getItemID();
+            
+            if(!this->addItem(std::move(item))){
+                std::cerr << "Can not add the element with ID: " << currId << ". Item with this ID already present in inventory. Skipping... \n";
+            }
         }
-
+        catch(const std::invalid_argument& e)
+        {
+            std::cerr << "Error reading line " <<lineNumber << ": " << e.what() << ". Skipping... \n";
+        }
     }
 
     inputFile.close();
@@ -135,10 +214,8 @@ void Inventory::saveToFile(const std::string& path) const {
         }
 
         for(const auto& item: itemsCollection){
-            outputFile << item.second.getItemID() << ","
-                    << item.second.getName() << ","
-                    << item.second.getQuantity() << ","
-                    << item.second.getPrice()<< "\n";
+            item.second->saveItemToFile(outputFile);
+            outputFile << "\n";
         }
 
         outputFile.close();

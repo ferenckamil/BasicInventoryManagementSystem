@@ -1,23 +1,37 @@
 #include "item.hpp"
+
 #include <stdexcept>
+#include <iostream>
 
 Item::Item(const std::string&  itemID, const std::string& name, int quantity, double price) :
-    itemID(itemID), name(name), quantity(quantity), price(price) {}
+    itemID(itemID), name(name), quantity(quantity), price(price) {
+
+    if(itemID.empty())
+    {
+        throw std::invalid_argument("Item ID can not be empty");
+    }
+
+    if(name.empty())
+    {
+        throw std::invalid_argument("Name can not be empty");
+    }
+
+    if(quantity<0)
+    {
+        throw std::invalid_argument("Quantity can not be less than zero");
+    }
+
+    if(price<0)
+    {
+        throw std::invalid_argument("Price can not be less than zero");
+    }
+}
 
 void Item::setItemID(std::string itemID) {
     if(itemID.empty())
     {
         throw std::invalid_argument("Item ID can not be empty");
     }
-
-    /*
-    in case of requirment that id can not have space sign there
-
-    if(itemID.find(' ') != std::string::npos)
-    {
-        throw std::invalid_argument("Item ID can not contain spaces");
-    }
-    */
 
     this->itemID = itemID;
 }
@@ -63,4 +77,18 @@ void Item::setPrice(double price) {
 
 double Item::getPrice() const {
     return price;
+}
+
+void Item::displayItem() const {
+    std::cout<<"Item ID: "<<this->getItemID()
+              <<", Name: "<<this->getName()
+              <<", Quantity: "<<this->getQuantity()
+              <<", Price: "<<this->getPrice();
+}
+
+void Item::saveItemToFile(std::ostream& output) const {
+    output << this->getItemID() << ","
+           << this->getName() << ","
+           << this->getQuantity() << ","
+           << this->getPrice();
 }

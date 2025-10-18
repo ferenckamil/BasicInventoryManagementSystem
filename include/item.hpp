@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <ostream>
 
 class Item {
     private:
@@ -12,6 +13,7 @@ class Item {
     public:
     
         Item(const std::string&  itemID, const std::string& name, int quantity, double price);
+        virtual ~Item() = default;
 
         void setItemID(std::string id);
         std::string getItemID() const;
@@ -25,4 +27,6 @@ class Item {
         void setPrice(double price);
         double getPrice() const;
 
+        virtual void displayItem() const;
+        virtual void saveItemToFile(std::ostream& output) const;
 };
