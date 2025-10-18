@@ -68,7 +68,10 @@ bool Inventory::addItem(std::unique_ptr<Item> item) {
         return false;
     }
 
-    auto result = itemsCollection.emplace(std::make_pair(item->getItemID(), std::move(item)));
+    //getting id before, to avoid the case that item has been moved first
+    const std::string& itemId = item->getItemID();
+
+    auto result = itemsCollection.emplace(std::make_pair(itemId, std::move(item)));
 
     return result.second;
 }
@@ -175,6 +178,8 @@ void Inventory::readFromFile(const std::string& path) {
             }
             
             std::unique_ptr<Item> item = it->second(elements);
+
+            //getting id before, to avoid the case that item has been moved first
             std::string currId = item->getItemID();
             
             if(!this->addItem(std::move(item))){
