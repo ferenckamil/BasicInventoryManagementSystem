@@ -13,9 +13,9 @@ using std::chrono::month;
 int main() {
     
     std::cout<<"TEST APP"<<"\n";
-    auto item1 = std::make_unique<Item>("1", "Watch", 25, 199.99);
-    auto item2 = std::make_unique<Electronics>("4", "Ipad", 7, 1599.99, 2025y / 12 / 1d);
-    auto item3 = std::make_unique<Groceries>("3", "Mango", 50, 2000.99, 2025y / 11 / 20d);
+    auto item1 = std::make_shared<Item>("1", "Watch", 25, 199.99);
+    auto item2 = std::make_shared<Electronics>("4", "Ipad", 7, 1599.99, 2025y / 12 / 1d);
+    auto item3 = std::make_shared<Groceries>("3", "Mango", 50, 2000.99, 2025y / 11 / 20d);
 
     // item1->displayItem();
     // std::cout<<"\n";
@@ -28,7 +28,7 @@ int main() {
     // try
     // {
         
-    //     auto item3Wrong = std::make_unique<Groceries>("3", "Mango", 50, -1, 2025y / 11 / 20d);
+    //     auto item3Wrong = std::make_shared<Groceries>("3", "Mango", 50, -1, 2025y / 11 / 20d);
     // }
     // catch(const std::exception& e)
     // {
@@ -42,9 +42,9 @@ int main() {
     
     std::cout<<"Adding items..."<<"\n";
 
-    store.addItem(std::move(item1));
-    store.addItem(std::move(item2));
-    store.addItem(std::move(item3));
+    store.addItem(item1);
+    store.addItem(item2);
+    store.addItem(item3);
 
     store.displayInventory();
 
@@ -70,47 +70,48 @@ int main() {
 
     // store.displayInventory();
 
-    // std::cout<<"Test Inventory read from file..."<<"\n";
+    std::cout<<"Test Inventory read from file..."<<"\n";
 
-    // std::string path = "../text-files/input.txt";
-    // std::string path2 = "../text-files/input2.txt";
-    // std::string outputPath = "../text-files/output.txt";
-    // std::string outputPath2 = "../text-files/output2.txt";
-    // Inventory storeFromFile;
+    std::string path = "../text-files/input.txt";
+    std::string path2 = "/text-files/input2.txt";
+    std::string outputPath = "../text-files/output.txt";
+    std::string outputPath2 = "../text-files/output2.txt";
+    
+    Inventory storeFromFile;
 
-    // try{
-    //     storeFromFile.readFromFile(path);
-    // }
-    // catch (const std::runtime_error& e)
-    // {
-    //     std::cerr<<e.what()<<"\n";
-    // }
+    try{
+        storeFromFile.readFromFile(path);
+    }
+    catch (const std::runtime_error& e)
+    {
+        std::cerr<<e.what()<<"\n";
+    }
 
-    // storeFromFile.displayInventory();
+    storeFromFile.displayInventory();
 
-    // storeFromFile.addItem(std::move(item2));
+    storeFromFile.addItem(item2);
 
-    // storeFromFile.displayInventory();
+    storeFromFile.displayInventory();
 
-    // storeFromFile.updateItem("1", 200);
+    storeFromFile.updateItem("1", 200);
 
-    // storeFromFile.displayInventory();
+    storeFromFile.displayInventory();
 
-    // std::cout<<"Saving to file..."<<"\n";
+    std::cout<<"Saving to file..."<<"\n";
 
-    // try{
-    //     storeFromFile.saveToFile(outputPath);
-    // }
-    // catch (const std::runtime_error& e)
-    // {
-    //     std::cerr<<e.what()<<"\n";
-    // }
+    try{
+        storeFromFile.saveToFile(outputPath);
+    }
+    catch (const std::runtime_error& e)
+    {
+        std::cerr<<e.what()<<"\n";
+    }
 
     // std::cout<<"Test Inventory read from file - cannot add..."<<"\n";
 
     // Inventory storeFromFile2;
 
-    // storeFromFile2.addItem(std::move(item1));
+    // storeFromFile2.addItem(item1);
 
     // storeFromFile2.displayInventory();
 

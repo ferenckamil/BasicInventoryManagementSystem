@@ -87,7 +87,8 @@ void Item::displayItem() const {
 }
 
 void Item::saveItemToFile(std::ostream& output) const {
-    output << this->getItemID() << ","
+    output << "ITEM,"
+           << this->getItemID() << ","
            << this->getName() << ","
            << this->getQuantity() << ","
            << this->getPrice();

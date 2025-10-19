@@ -11,7 +11,7 @@
 #include <algorithm>
 
 Inventory::Inventory() {
-    itemFactoryRegistry["ELECTRONICS"] = [](const std::vector<std::string>& elements) -> std::unique_ptr<Item> {
+    itemFactoryRegistry["ELECTRONICS"] = [](const std::vector<std::string>& elements) -> std::shared_ptr<Item> {
         if (elements.size() != 6) 
         {
             throw std::invalid_argument("Incorrect input data for Electronics");
@@ -26,13 +26,13 @@ Inventory::Inventory() {
             throw std::invalid_argument("Invalid warranty period period format");
         }
         
-        return std::make_unique<Electronics>(elements[1], elements[2], std::stoi(elements[3]), std::stod(elements[4]), warrantyPeriod);
+        return std::make_shared<Electronics>(elements[1], elements[2], std::stoi(elements[3]), std::stod(elements[4]), warrantyPeriod);
     };
 
-    itemFactoryRegistry["GROCERIES"] = [](const std::vector<std::string>& elements) -> std::unique_ptr<Item> {
+    itemFactoryRegistry["GROCERIES"] = [](const std::vector<std::string>& elements) -> std::shared_ptr<Item> {
         if (elements.size() != 6) 
         {
-            throw std::invalid_argument("Incorrect input data for Groceries");
+            throw std::invalid_argument("Incorrect input data for Groceries");         
         }
         
         std::chrono::year_month_day expirationDate;
@@ -44,16 +44,16 @@ Inventory::Inventory() {
             throw std::invalid_argument("Invalid expiration date period format");
         }
         
-        return std::make_unique<Groceries>(elements[1], elements[2], std::stoi(elements[3]), std::stod(elements[4]), expirationDate);
+        return std::make_shared<Groceries>(elements[1], elements[2], std::stoi(elements[3]), std::stod(elements[4]), expirationDate);
     };
 
-    itemFactoryRegistry["ITEM"] = [](const std::vector<std::string>& elements) -> std::unique_ptr<Item> {
+    itemFactoryRegistry["ITEM"] = [](const std::vector<std::string>& elements) -> std::shared_ptr<Item> {
         if (elements.size() != 5) 
         {
             throw std::invalid_argument("Incorrect input data for Groceries");
         }
         
-        return std::make_unique<Item>(elements[1], elements[2], std::stoi(elements[3]), std::stod(elements[4]));
+        return std::make_shared<Item>(elements[1], elements[2], std::stoi(elements[3]), std::stod(elements[4]));
     };
 }
 
@@ -61,7 +61,7 @@ Inventory::Inventory() {
 returns true if add operation was successful
 return false if item with same id already exist in the inventory.
 */
-bool Inventory::addItem(std::unique_ptr<Item> item) {
+bool Inventory::addItem(const std::shared_ptr<Item>& item) {
 
     if(!item)
     {
@@ -71,7 +71,7 @@ bool Inventory::addItem(std::unique_ptr<Item> item) {
     //getting id before, to avoid the case that item has been moved first
     const std::string& itemId = item->getItemID();
 
-    auto result = itemsCollection.emplace(std::make_pair(itemId, std::move(item)));
+    auto result = itemsCollection.emplace(std::make_pair(itemId, item));
 
     return result.second;
 }
@@ -177,12 +177,12 @@ void Inventory::readFromFile(const std::string& path) {
                 throw std::invalid_argument("Unknown item type: " + itemType);
             }
             
-            std::unique_ptr<Item> item = it->second(elements);
+            std::shared_ptr<Item> item = it->second(elements);
 
             //getting id before, to avoid the case that item has been moved first
             std::string currId = item->getItemID();
             
-            if(!this->addItem(std::move(item))){
+            if(!this->addItem(item)){
                 std::cerr << "Can not add the element with ID: " << currId << ". Item with this ID already present in inventory. Skipping... \n";
             }
         }

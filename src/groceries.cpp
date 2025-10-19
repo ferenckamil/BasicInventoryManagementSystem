@@ -42,7 +42,8 @@ void Groceries::displayItem() const {
 }
 
 void Groceries::saveItemToFile(std::ostream& output) const {
-    output << this->getItemID() << ","
+    output << "GROCERIES,"
+           << this->getItemID() << ","
            << this->getName() << ","
            << this->getQuantity() << ","
            << this->getPrice() << ","

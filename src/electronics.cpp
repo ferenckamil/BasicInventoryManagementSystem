@@ -42,7 +42,8 @@ void Electronics::displayItem() const {
 }
 
 void Electronics::saveItemToFile(std::ostream& output) const {
-    output << this->getItemID() << ","
+    output << "ELECTRONICS,"
+           << this->getItemID() << ","
            << this->getName() << ","
            << this->getQuantity() << ","
            << this->getPrice() << ","
