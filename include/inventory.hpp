@@ -20,7 +20,7 @@ class Inventory{
         */
         std::unordered_map<std::string, std::unique_ptr<Item>> itemsCollection;
 
-        //helper function used to read data from file
+        //Helper function used to read data from file
         void split(const std::string& line, char delimiter, std::vector<std::string>& elements);
         
         //Defing factory
@@ -30,11 +30,18 @@ class Inventory{
     public:
         Inventory();
 
+        //Inventory management
         bool addItem(std::unique_ptr<Item> item);
         bool removeItem(const std::string& itemID);
         bool updateItem(const std::string& itemID, int quantity);
         void displayInventory() const;
 
+        //File operations
         void readFromFile(const std::string& path);
         void saveToFile(const std::string& path) const;
+
+        //Searching functions
+        const Item* findHighestPrice() const;
+        void findItemsBelowQuantityThreshold(int threshold, std::vector<const Item*>& resultVec) const;
+        //const std::vector<Item*> findItemsBelowQuantityThreshold(int threshold) const;
 };
