@@ -1,7 +1,6 @@
-#include <inventory.hpp>
-
-#include <electronics.hpp>
-#include <groceries.hpp>
+#include "Inventory.hpp"
+#include "Electronics.hpp"
+#include "Groceries.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -108,16 +107,8 @@ bool Inventory::updateItem(const std::string& itemID, int quantity) {
 
     if(auto found = itemsCollection.find(itemID); found != itemsCollection.end())
     {
-        try
-        {
-            found->second->setQuantity(quantity);
-        }
-        catch(const std::invalid_argument& e)
-        {
-            std::cerr << e.what() << '\n';
-        }
-        
-        
+        found->second->setQuantity(quantity);
+       
         return true;
     }
 
@@ -262,6 +253,12 @@ void Inventory::findItemsBelowQuantityThreshold(int threshold, std::vector<const
 
     resultVec.clear();
     //O(n) - iterating over whole unordered map
+    if(threshold < 0)
+    {
+        std::cerr<<"Threshold is negative number\n";
+        return;
+    }
+
     for(auto& val: itemsCollection)
     {
         if(val.second->getQuantity() < threshold)

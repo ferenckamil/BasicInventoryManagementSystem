@@ -13,8 +13,21 @@ C++ application that models a basic inventory management system for a store. The
 ```
 BasicInventoryManagementSystem/
 ├── include/ # Header files
+|   ├── CommandLineInterface.hpp
+|   ├── Electronics.hpp
+|   ├── Groceries.hpp
+|   ├── Inventory.hpp
+|   └── Item.hpp
 ├── src/ # Source files
+|   ├── CommandLineInterface.cpp
+|   ├── Electronics.cpp
+|   ├── Groceries.cpp
+|   ├── Inventory.cpp
+|   ├── Item.cpp
+|   └── main.cpp
 ├── text-files/ # TXT file to populate inventory and sample output file with saved inventory
+|   ├── input.txt
+|   └── output.txt
 ├── CMakeLists.txt # CMake build configuration
 └── README.md # Project description
 ```
@@ -42,7 +55,3 @@ Follow the on-screen instructions to:
 
 TODO
 
-## Improvements
-
-- Add unit tests
-- Add the dockerfile to run the application in the container

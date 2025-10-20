@@ -9,9 +9,10 @@ include_directories(include)
 
 # Add executable
 add_executable(BasicInventoryManagementSystem
-    src/item.cpp
-    src/inventory.cpp
-    src/electronics.cpp
-    src/groceries.cpp
+    src/Item.cpp
+    src/Inventory.cpp
+    src/Electronics.cpp
+    src/Groceries.cpp
+    src/CommandLineInterface.cpp
     src/main.cpp
 )

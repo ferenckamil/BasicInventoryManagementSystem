@@ -6,7 +6,7 @@
 #include <memory>
 #include <functional>
 
-#include <item.hpp>
+#include "Item.hpp"
 
 class Inventory{
     private:
@@ -35,7 +35,7 @@ class Inventory{
         //Helper function used to read data from file
         void split(const std::string& line, char delimiter, std::vector<std::string>& elements);
         
-        //Defing factory
+        //Defining factory
         using ItemFactoryFunc = std::function<std::shared_ptr<Item>(const std::vector<std::string>&)>;
         std::unordered_map<std::string, ItemFactoryFunc> itemFactoryRegistry;
 
@@ -55,5 +55,4 @@ class Inventory{
         //Searching functions
         const Item* findHighestPrice() const;
         void findItemsBelowQuantityThreshold(int threshold, std::vector<const Item*>& resultVec) const;
-        //const std::vector<Item*> findItemsBelowQuantityThreshold(int threshold) const;
 };
