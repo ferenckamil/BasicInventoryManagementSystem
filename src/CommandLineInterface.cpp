@@ -6,7 +6,41 @@
 #include <chrono>
 
 CommandLineInterface::CommandLineInterface() : isRunning(true) {
+    char choice = 'n';
+    std::cout << "========================================\n";
+    std::cout << " Basic Inventory Management System\n";
+    std::cout << "========================================\n";
+    std::cout << "Preload data from file? (y/n): ";
+    
+    std::cin >> choice;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
 
+    if (std::tolower(choice) == 'y') 
+    {
+        std::string filename;
+        std::cout << "Enter path to file: ";
+
+        std::getline(std::cin, filename); 
+
+        if (filename.empty()) {
+            std::cerr << "File name empty, starting with empty inventory...\n";
+        } else {
+            try {
+                inventory.readFromFile(filename); 
+                
+                std::cout << "Inventory successfully populated from the file : " << filename << "\n";
+            } 
+            catch (const std::exception& e) {
+                std::cerr <<"Error reading from file: "<<e.what()<<". Most propably reason: incorrect path\n";
+                std::cerr << "Starting with empty inventory...\n";
+            }
+        }
+    } else {
+        std::cout << "Starting with empty inventory...\n";
+    }
+
+    std::cout << "\nPress Enter to continue...";
+    std::cin.get(); // Czeka na Enter
 }
 
 void CommandLineInterface::run() {
@@ -66,13 +100,13 @@ void CommandLineInterface::displayHelp() const {
               << "     Prompts if you want to exit the program.\n"
               << "================================================\n";
 
-    std::cout<<"Press any key to continue...\n";
+    std::cout<<"Press Enter to continue...\n";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
 }
 
 //TODO:
-//improve handleRemove and handleUpdate by asking to type id again or abort
+
 //refactor common parts of each function by creation of helper functions
 
 
@@ -92,6 +126,11 @@ void CommandLineInterface::handleAddItem() {
 
         std::cout<<"Insert item type (supported types are: \"ELECTRONICS\", \"GROCERIES\", \"ITEM\"):\n"; 
         std::cin >> itemType;
+
+        for (char &c : itemType) {
+            c = std::toupper(static_cast<unsigned char>(c));
+        }
+
         if (itemType != "ELECTRONICS" && itemType != "GROCERIES" && itemType != "ITEM") {
             std::cerr << "Unknown item type '" << itemType << "'.\n";
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -101,16 +140,14 @@ void CommandLineInterface::handleAddItem() {
         if (!inputError) 
         {
             std::cout<<"Insert item ID:\n"; 
-            std::getline(std::cin, itemId);
+            std::cin >> itemId;
             if (itemId.empty() || itemId.find(' ') != std::string::npos) 
             {
                 std::cerr << "Item ID can not be empty or containing spaces\n";
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 inputError = true;
             } 
-        }
-
-        
+        }        
         
         if (!inputError) 
         {
@@ -127,7 +164,7 @@ void CommandLineInterface::handleAddItem() {
         {
             std::cout<<"Insert item price (supported format are: X / X.Y):\n";
             std::cin >> price;
-            if (std::cin.fail() || price < 0.0) {
+            if (std::cin.fail() || price <= 0.0) {
                 std::cerr << "Price can not be less or equal zero\n";
                 std::cin.clear();
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -139,7 +176,7 @@ void CommandLineInterface::handleAddItem() {
         {
             std::cout<<"Insert item quantity:\n"; 
             std::cin >> quantity;
-            if (std::cin.fail() || quantity < 0) {
+            if (std::cin.fail() || quantity <= 0) {
                 std::cerr << "Quantity can not be less or equal zero\n";
                 std::cin.clear();
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -183,7 +220,7 @@ void CommandLineInterface::handleAddItem() {
                         
                     newItem = std::make_shared<Groceries>(itemId, itemName, quantity, price, expirationDate);
                 } 
-                else //itemType == "ITEM 
+                else
                 {
                     newItem = std::make_shared<Item>(itemId, itemName, quantity, price);
                 }
@@ -214,7 +251,7 @@ void CommandLineInterface::handleAddItem() {
 
     } while (std::tolower(runAgain) == 'y');
 
-    std::cout<<"Press any key to continue...\n";
+    std::cout<<"Press Enter to continue...\n";
     std::cin.get();
 
 }
@@ -232,26 +269,26 @@ void CommandLineInterface::handleRemoveItem() {
         if (itemId.empty() || itemId.find(' ') != std::string::npos) 
         {
             std::cerr << "Item ID can not be empty or containing spaces\n";
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            continue;
-        }
-
-        if(inventory.removeItem(itemId))
-        {
-            std::cout<<"Item removed successfully!\n";
         }
         else
         {
-            std::cerr << "Can not remove the element with ID: " << itemId << ". Item not found\n";
+            if(inventory.removeItem(itemId))
+            {
+                std::cout<<"Item removed successfully!\n";
+            }
+        else
+            {
+                std::cerr << "Can not remove the element with ID: " << itemId << ". Item not found\n";
+            }
         }
 
+        
         std::cout << "Remove another item? (y/n): \n";
         std::cin >> runAgain;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
 
     } while (std::tolower(runAgain) == 'y');
 
-    std::cout<<"Press any key to continue...\n";
+    std::cout<<"Press Enter to continue...\n";
     std::cin.get();
 }
 
@@ -265,24 +302,23 @@ void CommandLineInterface::handleUpdateQuantity() {
         bool inputError = false;
 
         std::cout<<"Insert item ID that should be update:\n"; 
-        std::cin >> itemId;
-
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::getline(std::cin, itemId);
 
         if (itemId.empty() || itemId.find(' ') != std::string::npos) 
         {
-            std::cerr << "Item ID can not be empty or containing spaces\n";
+            std::cerr << "Item ID can not be empty or containing spaces. Press Enter to continue...\n";
+            std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             inputError = true;
         }
 
         if (!inputError) 
         {
-            std::cout<<"Insert new quantity for item:\\n"; 
+            std::cout<<"Insert new quantity for item:\n"; 
             std::cin >> quantity;
             if (std::cin.fail() || quantity < 0) {
-                std::cerr << "Quantity can not be less or equal zero\n";
+                std::cerr << "Quantity can not be less or equal zero. Press Enter to continue...\n";
                 std::cin.clear();
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 inputError = true;
@@ -299,7 +335,7 @@ void CommandLineInterface::handleUpdateQuantity() {
                 }
                 else
                 {
-                    std::cerr << "Can not remove the element with ID: " << itemId << "\n";
+                    std::cerr << "Can not update the element with ID: " << itemId << "\n";
                 }
             }
             catch (const std::invalid_argument& e)
@@ -309,19 +345,18 @@ void CommandLineInterface::handleUpdateQuantity() {
         }
 
         std::cout << "Update quantity for another item? (y/n): \n";
-        std::cin >> runAgain;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+        std::cin >> runAgain; 
 
     } while (std::tolower(runAgain) == 'y');
 
-    std::cout<<"Press any key to continue...\n";
+    std::cout<<"Press Enter to continue...\n";
     std::cin.get();
 }
 
 void CommandLineInterface::handleDisplayInventory() {
     inventory.displayInventory();
 
-    std::cout<<"Press any key to continue...\n";
+    std::cout<<"Press Enter to continue...\n";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
 }
@@ -331,46 +366,94 @@ void CommandLineInterface::handleReadFromFile() {
 
     bool isReadCorrect = false;
 
-    do {
+    while(!isReadCorrect) {
         isReadCorrect = false;
 
-        std::cout<<"Insert a path to the input file: \n";
-        std::cin >> inputFile;
+        std::cout<<"Insert a path to the input file: ";
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::getline(std::cin, inputFile);
+
+        if (inputFile.empty()) {
+            std::cout << "Read from file canceled.\n";
+            isReadCorrect = true;
+            continue;
+        }
 
         try {     
             inventory.readFromFile(inputFile);
             std::cout<<"Inventory successfully populated from the file :"<<inputFile<<"\n";
             inventory.displayInventory();
+            isReadCorrect = true;
         } 
         catch (const std::runtime_error& e) {
             std::cerr<<"Error reading from file: "<<e.what()<<". Most propably reason: incorrect path\n";
 
-            char runAgain = 'y';
+            char runAgain = 'n';
             std::cout << "Try again? (y/n): \n";
             std::cin >> runAgain;
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-            if (std::tolower(runAgain) == 'y') {
+            if (std::tolower(runAgain) != 'y') {
+                std::cout << "Read from file aborted\n";
                 isReadCorrect = true;
-            } else {
-                 std::cout << "Read from file aborted\n";
-            }
+            } 
         } catch (const std::exception& e) {
             std::cerr<<"Error reading from file: "<<e.what()<<"\n";
-            isReadCorrect = false; 
+            isReadCorrect = true; 
         }
-    } while (isReadCorrect);
-    
-    if (!isReadCorrect) 
-    {
-        std::cout<<"Press any key to continue...\n";
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cin.get();
     }
+    
+    std::cout<<"Press any key to continue...\n";
+    std::cin.get();
+
 }
 
 void CommandLineInterface::handleSaveToFile() {
     std::string outputFile;
+    bool isWriteCorrect = false;
+
+    while(!isWriteCorrect) {
+        std::cout<<"Insert a path where output file will be stored: ";
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::getline(std::cin, outputFile);
+
+        if (outputFile.empty()) {
+            std::cout << "Save to file canceled.\n";
+            isWriteCorrect = true;
+            continue;
+        }
+
+        if (outputFile.find(' ') != std::string::npos) {
+             std::cerr << "Error: Path cannot contain spaces.\n";
+             char runAgain = 'n';
+             std::cout << "Try entering the path again? (y/n): ";
+             std::cin >> runAgain;
+             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+             if (std::tolower(runAgain) != 'y') {
+                 std::cout << "Save to file aborted.\n";
+                 isWriteCorrect = true;
+             }
+             continue; 
+        }
+
+        try{
+            inventory.saveToFile(outputFile);
+            std::cout<<"Inventory saved to file :"<<outputFile<<"\n";
+        }
+        catch (const std::runtime_error& e)
+        {
+            std::cerr<<"Error saving the file: "<<e.what()<<"\n";
+            char runAgain = 'n';
+            std::cout << "Try again? (y/n): ";
+            std::cin >> runAgain;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            if (std::tolower(runAgain) != 'y') {
+                std::cout << "Save to file aborted.\n";
+                isWriteCorrect = true;
+            }
+        }
+    }
 
     std::cout<<"Insert a path where output file will be stored: \n";
     std::cin >> outputFile;
@@ -396,7 +479,7 @@ void CommandLineInterface::handleMostExpensiveItem() {
 
     std::cout<<"\n";
 
-    std::cout<<"Press any key to continue...\n";
+    std::cout<<"Press Enter to continue...\n";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
 }
@@ -422,12 +505,12 @@ void CommandLineInterface::handleItemBelowThreshold() {
             }
 
         if (inputError) {
-            std::cout << "Try again? (y/n): \n";
+            std::cout << "Try again? (y/n): ";
             std::cin >> runAgain;
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             if (std::tolower(runAgain) != 'y') {
                 std::cout << "Aborted\n";
-                std::cout << "Press any key to continue...\n";
+                std::cout << "Press Enter to continue...\n";
                 std::cin.get();
                 return;
             }
@@ -453,12 +536,13 @@ void CommandLineInterface::handleItemBelowThreshold() {
             {
                 item->displayItem();
             }
+            std::cout <<'\n';
         }
 
-        std::cout << "\n-------------------------------------------\n";
+        std::cout << "-------------------------------------------\n";
     }
 
-    std::cout<<"Press any key to continue...\n";
+    std::cout<<"Press Enter to continue...\n";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
 }
