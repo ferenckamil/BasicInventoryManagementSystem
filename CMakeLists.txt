@@ -14,5 +14,6 @@ add_executable(BasicInventoryManagementSystem
     src/Electronics.cpp
     src/Groceries.cpp
     src/CommandLineInterface.cpp
+    src/CLIHelpers.cpp
     src/main.cpp
 )
