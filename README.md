@@ -13,12 +13,14 @@ C++ application that models a basic inventory management system for a store. The
 ```
 BasicInventoryManagementSystem/
 ├── include/ # Header files
+|   ├── CLIHelpers.hpp
 |   ├── CommandLineInterface.hpp
 |   ├── Electronics.hpp
 |   ├── Groceries.hpp
 |   ├── Inventory.hpp
 |   └── Item.hpp
 ├── src/ # Source files
+|   ├── CLIHelpers.cpp
 |   ├── CommandLineInterface.cpp
 |   ├── Electronics.cpp
 |   ├── Groceries.cpp
@@ -50,6 +52,8 @@ Follow the on-screen instructions to:
 - Add, remove, or update inventory items
 - View the current inventory
 - Save or load inventory data from files
+- Display the item with highest price
+- List the items from the inventory below given threshold
 
 # Demo
 
